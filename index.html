@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="so" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4f6fb">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Rafeno — wadaag qoraal iyo faylal si fudud, degdeg ah oo ammaan ah.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rafeno">
+<title>Rafeno — Wadaag wax kasta</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%234f46e5'/%3E%3Cpath d='M8 12.5l2.8 2.8L16.5 9' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<div class="aurora" aria-hidden="true"></div>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"></circle>
+          <circle cx="6" cy="12" r="3"></circle>
+          <circle cx="18" cy="19" r="3"></circle>
+          <line x1="8.6" y1="10.6" x2="15.4" y2="6.4"></line>
+          <line x1="8.6" y1="13.4" x2="15.4" y2="17.6"></line>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>Rafeno</h1>
+        <p>Wadaag wax kasta — si fudud</p>
+      </div>
+    </div>
+
+    <button id="themeBtn" class="icon-btn" type="button" aria-label="Beddel muuqaalka">
+      <svg class="ico ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+      </svg>
+      <svg class="ico ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+      </svg>
+    </button>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Qaybaha appka">
+    <button class="tab is-active" type="button" role="tab" data-tab="text" aria-selected="true">Qoraal</button>
+    <button class="tab" type="button" role="tab" data-tab="file" aria-selected="false">Faylal</button>
+    <button class="tab" type="button" role="tab" data-tab="saved" aria-selected="false">
+      Kaydka <span class="badge" id="countBadge">0</span>
+    </button>
+  </nav>
+
+  <main class="content">
+
+    <section class="panel is-active" id="panel-text" role="tabpanel" aria-label="Qoraal">
+      <div class="card">
+        <label class="sr-only" for="textInput">Qoraalka</label>
+        <textarea id="textInput" class="textarea" rows="7" maxlength="20000"
+          placeholder="Qor ama dheji qoraalka aad rabto inaad wadaagto…"></textarea>
+
+        <div class="card-foot">
+          <span class="counter"><b id="charCount">0</b> / 20000 xaraf</span>
+          <div class="btn-row">
+            <button class="btn ghost sm" id="pasteBtn" type="button">Dheji</button>
+            <button class="btn ghost sm" id="clearTextBtn" type="button">Nadiifi</button>
+            <button class="btn soft sm" id="saveTextBtn" type="button">Kaydi</button>
+            <button class="btn primary sm" id="shareTextBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-ico">
+                <circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.6" y1="10.6" x2="15.4" y2="6.4"></line><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"></line>
+              </svg>
+              Wadaag
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hint-row">
+        <span class="hint-label">Degdeg:</span>
+        <button class="chip" type="button" data-quick="Assalamu calaykum, sidee tahay?">Salaan</button>
+        <button class="chip" type="button" data-quick="Fadlan iiga jawaab markaad fursad hesho.">Codsi</button>
+        <button class="chip" type="button" data-quick="Mahadsanid aad iyo aad!">Mahadsanid</button>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-file" role="tabpanel" aria-label="Faylal" hidden>
+      <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Dooro faylal">
+        <div class="dz-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </div>
+        <h3>Soo jiid faylasha halkan</h3>
+        <p>ama taabo si aad u dooratid — sawir, PDF, qoraal, iwm.<br><span class="muted">Xadka: 4 MB fayl kasta</span></p>
+        <button class="btn primary" id="pickBtn" type="button">Dooro faylal</button>
+        <input type="file" id="fileInput" multiple hidden>
+      </div>
+
+      <div id="stagedWrap" class="stack" hidden>
+        <div class="section-head">
+          <h3>Diyaar u ah wadaag</h3>
+          <button class="link-btn" id="clearStaged" type="button">Nadiifi</button>
+        </div>
+        <div id="stagedList" class="stack"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-saved" role="tabpanel" aria-label="Kaydka" hidden>
+      <div class="section-head">
+        <h3>Kaydkaaga</h3>
+        <button class="link-btn danger" id="clearAllBtn" type="button">Tirtir dhammaan</button>
+      </div>
+      <div id="savedList" class="stack"></div>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <span>Rafeno · v1.0</span>
+    <span class="dot">•</span>
+    <span>Wax walba waxay ku kaydsan yihiin qalabkaaga</span>
+  </footer>
+</div>
+
+<div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <div class="sheet-handle" aria-hidden="true"></div>
+  <h3 id="sheetTitle">Wadaag</h3>
+  <p class="sheet-sub" id="sheetSub"></p>
+  <div class="sheet-grid" id="sheetGrid"></div>
+  <button class="btn ghost full" id="sheetClose" type="button">Xir</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="script.js"></script>
+</body>
+          </html>
