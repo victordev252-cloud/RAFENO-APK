@@ -29,7 +29,11 @@ jobs:
       - name: Prepare web assets
         run: |
           mkdir -p www
-          cp index.html style.css script.js www/
+          if [ -f index.html ]; then cp index.html www/; echo "✓ index.html"; else echo "✗ index.html MISSING"; exit 1; fi
+          if [ -f style.css ]; then cp style.css www/; echo "✓ style.css"; else echo "✗ style.css MISSING"; exit 1; fi
+          if [ -f script.js ]; then cp script.js www/; echo "✓ script.js"; else echo "✗ script.js MISSING"; exit 1; fi
+          echo "--- www contents ---"
+          ls -la www/
 
       - name: Install Capacitor
         run: |
@@ -57,7 +61,7 @@ jobs:
             -storepass rafeno123 -keypass rafeno123 \
             -dname "CN=Rafeno, OU=Mobile, O=Rafeno, L=Mogadishu, S=Banaadir, C=SO"
 
-      - name: Inject signing config into build.gradle
+      - name: Configure signing in build.gradle
         run: |
           python3 << 'PYEOF'
           import re
@@ -65,29 +69,30 @@ jobs:
           with open(path, 'r') as f:
               content = f.read()
 
-          signing_configs = '''    signingConfigs {
+          # Insert signingConfigs block right after "android {"
+          signing_block = '''    signingConfigs {
               release {
-                  storeFile file(System.getenv("KEYSTORE_PATH") ?: "../../rafeno.keystore")
-                  storePassword System.getenv("KEYSTORE_PASSWORD") ?: "rafeno123"
-                  keyAlias System.getenv("KEY_ALIAS") ?: "rafeno"
-                  keyPassword System.getenv("KEY_PASSWORD") ?: "rafeno123"
+                  storeFile file("../../rafeno.keystore")
+                  storePassword "rafeno123"
+                  keyAlias "rafeno"
+                  keyPassword "rafeno123"
               }
           }
           '''
+          m = re.search(r'android\s*\{', content)
+          if m:
+              pos = m.end()
+              content = content[:pos] + '\n' + signing_block + content[pos:]
 
-          idx = content.find('android {')
-          if idx != -1:
-              insert_pos = idx + len('android {')
-              content = content[:insert_pos] + '\n' + signing_configs + content[insert_pos:]
-
-          pattern = r'(buildTypes\s*\{[\s\S]*?release\s*\{)'
-          match = re.search(pattern, content)
-          if match:
-              insert_pos = match.end()
-              content = content[:insert_pos] + '\n            signingConfig signingConfigs.release' + content[insert_pos:]
+          # Add signingConfig to release buildType
+          m2 = re.search(r'(buildTypes\s*\{[\s\S]*?release\s*\{)', content)
+          if m2:
+              pos = m2.end()
+              content = content[:pos] + '\n            signingConfig signingConfigs.release' + content[pos:]
 
           with open(path, 'w') as f:
               f.write(content)
+          print("✓ build.gradle patched")
           PYEOF
 
       - name: Build Release APK
@@ -96,11 +101,11 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
-      - name: Rename and verify APK
+      - name: Prepare APK output
         run: |
-          ls -la android/app/build/outputs/apk/release/
           mkdir -p output
           cp android/app/build/outputs/apk/release/app-release.apk output/app-release.apk
+          ls -lh output/
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
