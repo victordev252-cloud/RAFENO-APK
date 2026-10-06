@@ -11,7 +11,6 @@
   --primary-soft: #eef2ff;
   --danger: #e11d48;
   --danger-soft: #ffe4e6;
-  --success: #059669;
   --shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.18);
   --radius: 18px;
   --radius-sm: 12px;
@@ -33,7 +32,6 @@
   --primary-soft: #1e1b4b;
   --danger: #fb7185;
   --danger-soft: #4c0519;
-  --success: #34d399;
   --shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.5);
 }
 
@@ -305,4 +303,4 @@ body {
   .btn-row .btn { flex: 1; }
   .sheet-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .sheet-item span { font-size: 0.65rem; }
-  }
+                  }
