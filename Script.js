@@ -4,11 +4,7 @@
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
   const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
 
-  const STORAGE_KEYS = {
-    theme: 'rafeno_theme',
-    saved: 'rafeno_saved'
-  };
-
+  const STORAGE_KEYS = { theme: 'rafeno_theme', saved: 'rafeno_saved' };
   const MAX_FILE = 4 * 1024 * 1024;
 
   let savedItems = [];
@@ -49,6 +45,7 @@
 
   let toastTimer;
   function showToast(msg, duration = 2200) {
+    if (!toast) return;
     toast.textContent = msg;
     toast.classList.add('show');
     clearTimeout(toastTimer);
@@ -57,17 +54,20 @@
 
   function setTheme(theme) {
     html.setAttribute('data-theme', theme);
-    localStorage.setItem(STORAGE_KEYS.theme, theme);
+    try { localStorage.setItem(STORAGE_KEYS.theme, theme); } catch (e) {}
   }
   function initTheme() {
-    const stored = localStorage.getItem(STORAGE_KEYS.theme);
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    let stored = null;
+    try { stored = localStorage.getItem(STORAGE_KEYS.theme); } catch (e) {}
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     setTheme(stored || (prefersDark ? 'dark' : 'light'));
   }
-  themeBtn.addEventListener('click', () => {
-    const current = html.getAttribute('data-theme');
-    setTheme(current === 'dark' ? 'light' : 'dark');
-  });
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  }
 
   function switchTab(name) {
     tabs.forEach(t => {
@@ -92,31 +92,34 @@
     renderSaved();
   }
   function persistSaved() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.saved, JSON.stringify(savedItems));
-    } catch { showToast('Kaydku wuu buuxsamay'); }
+    try { localStorage.setItem(STORAGE_KEYS.saved, JSON.stringify(savedItems)); }
+    catch { showToast('Kaydku wuu buuxsamay'); }
     updateBadge();
   }
-  function updateBadge() { countBadge.textContent = savedItems.length; }
+  function updateBadge() { if (countBadge) countBadge.textContent = savedItems.length; }
 
-  function updateCharCount() { charCount.textContent = textInput.value.length; }
-  textInput.addEventListener('input', updateCharCount);
+  function updateCharCount() { if (charCount && textInput) charCount.textContent = textInput.value.length; }
+  if (textInput) textInput.addEventListener('input', updateCharCount);
 
-  pasteBtn.addEventListener('click', async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (text) {
-        textInput.value = text;
-        updateCharCount();
-        showToast('Waa la dhejiyay');
-      }
-    } catch { showToast('Dhejintu ma shaqeyn — isku day gacanta'); }
-  });
+  if (pasteBtn) {
+    pasteBtn.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          textInput.value = text;
+          updateCharCount();
+          showToast('Waa la dhejiyay');
+        }
+      } catch { showToast('Dhejintu ma shaqeyn — isku day gacanta'); }
+    });
+  }
 
-  clearTextBtn.addEventListener('click', () => {
-    textInput.value = '';
-    updateCharCount();
-  });
+  if (clearTextBtn) {
+    clearTextBtn.addEventListener('click', () => {
+      textInput.value = '';
+      updateCharCount();
+    });
+  }
 
   quickChips.forEach(chip => {
     chip.addEventListener('click', () => {
@@ -126,25 +129,29 @@
     });
   });
 
-  saveTextBtn.addEventListener('click', () => {
-    const text = textInput.value.trim();
-    if (!text) { showToast('Qoraal madhan lama kaydin karo'); return; }
-    savedItems.unshift({
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-      type: 'text',
-      text,
-      createdAt: Date.now()
+  if (saveTextBtn) {
+    saveTextBtn.addEventListener('click', () => {
+      const text = textInput.value.trim();
+      if (!text) { showToast('Qoraal madhan lama kaydin karo'); return; }
+      savedItems.unshift({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        type: 'text',
+        text,
+        createdAt: Date.now()
+      });
+      persistSaved();
+      renderSaved();
+      showToast('Qoraalka waa la kaydiyay');
     });
-    persistSaved();
-    renderSaved();
-    showToast('Qoraalka waa la kaydiyay');
-  });
+  }
 
-  shareTextBtn.addEventListener('click', () => {
-    const text = textInput.value.trim();
-    if (!text) { showToast('Qor wax aad wadaagto marka hore'); return; }
-    openShareSheet(text, 'text');
-  });
+  if (shareTextBtn) {
+    shareTextBtn.addEventListener('click', () => {
+      const text = textInput.value.trim();
+      if (!text) { showToast('Qor wax aad wadaagto marka hore'); return; }
+      openShareSheet(text, 'text');
+    });
+  }
 
   function formatBytes(bytes) {
     if (bytes < 1024) return bytes + ' B';
@@ -165,6 +172,7 @@
   }
 
   function renderStaged() {
+    if (!stagedWrap || !stagedList) return;
     if (!stagedFiles.length) {
       stagedWrap.hidden = true;
       stagedList.innerHTML = '';
@@ -223,6 +231,7 @@
   }
 
   function fileIcon(type) {
+    type = type || '';
     if (type.startsWith('image/')) return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`;
     if (type.startsWith('video/')) return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>`;
     if (type.startsWith('audio/')) return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`;
@@ -236,27 +245,31 @@
     return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
   }
 
-  dropzone.addEventListener('click', () => fileInput.click());
-  pickBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
-  fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
+  if (dropzone) {
+    dropzone.addEventListener('click', () => fileInput.click());
+    ['dragenter', 'dragover'].forEach(evt => {
+      dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('is-drag'); });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove('is-drag'); });
+    });
+    dropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+    });
+  }
+  if (pickBtn) pickBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+  if (fileInput) fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
 
-  ['dragenter', 'dragover'].forEach(evt => {
-    dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('is-drag'); });
-  });
-  ['dragleave', 'drop'].forEach(evt => {
-    dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove('is-drag'); });
-  });
-  dropzone.addEventListener('drop', (e) => {
-    if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
-  });
-
-  clearStaged.addEventListener('click', () => {
-    stagedFiles = [];
-    renderStaged();
-    showToast('Liiska waa la nadiifiyay');
-  });
+  if (clearStaged) {
+    clearStaged.addEventListener('click', () => {
+      stagedFiles = [];
+      renderStaged();
+      showToast('Liiska waa la nadiifiyay');
+    });
+  }
 
   function renderSaved() {
+    if (!savedList) return;
     if (!savedItems.length) {
       savedList.innerHTML = `
         <div class="empty">
@@ -337,15 +350,17 @@
     });
   }
 
-  clearAllBtn.addEventListener('click', () => {
-    if (!savedItems.length) return;
-    if (confirm('Ma hubtaa inaad tirtirto dhammaan kaydka?')) {
-      savedItems = [];
-      persistSaved();
-      renderSaved();
-      showToast('Kaydka waa la tirtiray');
-    }
-  });
+  if (clearAllBtn) {
+    clearAllBtn.addEventListener('click', () => {
+      if (!savedItems.length) return;
+      if (confirm('Ma hubtaa inaad tirtirto dhammaan kaydka?')) {
+        savedItems = [];
+        persistSaved();
+        renderSaved();
+        showToast('Kaydka waa la tirtiray');
+      }
+    });
+  }
 
   let currentShareData = null;
   let currentShareType = null;
@@ -464,10 +479,10 @@
     }
   }
 
-  sheetBackdrop.addEventListener('click', closeShareSheet);
-  sheetClose.addEventListener('click', closeShareSheet);
+  if (sheetBackdrop) sheetBackdrop.addEventListener('click', closeShareSheet);
+  if (sheetClose) sheetClose.addEventListener('click', closeShareSheet);
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !sheet.hidden) closeShareSheet();
+    if (e.key === 'Escape' && sheet && !sheet.hidden) closeShareSheet();
   });
 
   function init() {
